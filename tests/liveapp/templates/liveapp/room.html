@@ -1,0 +1,6 @@
+{% load hibira %}<!doctype html>
+<html><head>{% hibira_scripts %}</head>
+<body>
+{% hibira_stream room %}
+<ul id="messages">{% for message in room.messages.all %}{% include "liveapp/_message.html" %}{% endfor %}</ul>
+</body></html>

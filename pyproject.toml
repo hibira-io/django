@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-hibira"
+version = "0.1.0"
+description = "Realtime for Django without Channels, ASGI or Redis: live HTML, model broadcasts, presence and push over Hibira"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Hibira", email = "dev@hibira.io" }]
+keywords = ["django", "realtime", "websocket", "pusher", "htmx", "live", "presence", "hibira"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.1",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
+  "Framework :: Django :: 6.1",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+dependencies = ["Django>=4.2", "hibira>=0.1"]
+
+[project.urls]
+Homepage = "https://hibira.io"
+Repository = "https://github.com/hibira-io/django"
+Changelog = "https://github.com/hibira-io/django/blob/main/CHANGELOG.md"
+Issues = "https://github.com/hibira-io/django/issues"
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-django>=4.9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_hibira"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
