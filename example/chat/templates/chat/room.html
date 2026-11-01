@@ -1,0 +1,80 @@
+{% load hibira %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ room.name }} · django-hibira</title>
+  {% hibira_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+  <style>
+    :root { --bg: #f6f7fb; --card: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e6e8ef; --accent: #0c4b33; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0f1218; --card: #171b24; --ink: #e8ebf2; --muted: #9aa3b5; --line: #262c38; --accent: #44b78b; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 16px; grid-template-columns: 1fr 200px; }
+    header { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 12px; }
+    h1 { margin: 0; font-size: 22px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    #messages { list-style: none; margin: 0; padding: 8px 16px; min-height: 320px; max-height: 60vh; overflow: auto; }
+    .message { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); animation: in .25s ease-out; }
+    .message:last-child { border-bottom: 0; }
+    .message p { margin: 2px 0 0; }
+    .message time { color: var(--muted); font-size: 12px; }
+    .avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 600; }
+    form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+    input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; }
+    button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+    aside { padding: 12px 16px; align-self: start; }
+    aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 8px; }
+    aside ul { list-style: none; margin: 0; padding: 0; }
+    aside li::before { content: "● "; color: #2fbf71; }
+    hibira-stream[connected] + .status::after { content: "live"; color: #2fbf71; }
+    .status::after { content: "connecting…"; }
+    @keyframes in { from { opacity: 0; transform: translateY(4px); } }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1># {{ room.name }}</h1>
+    <span class="muted"><span id="count">{{ messages|length }}</span> messages · you are {{ request.session.name }} · </span>
+    {% hibira_stream room %}<span class="muted status"></span>
+  </header>
+  <section class="card">
+    <ul id="messages">{% for message in messages %}{% include "chat/_message.html" %}{% endfor %}</ul>
+    <form hx-post="{% url 'send' room.pk %}" hx-swap="none" hx-on::after-request="this.reset()">
+      {% csrf_token %}
+      <input name="body" placeholder="Message #{{ room.name }}" autocomplete="off" required maxlength="2000">
+      <button>Send</button>
+    </form>
+  </section>
+  <aside class="card">
+    <h2>Here now</h2>
+    <ul id="members"></ul>
+  </aside>
+</main>
+<script>
+  // Presence: who has this room open, through POST /hibira/auth.
+  document.addEventListener("DOMContentLoaded", function () {
+    var list = document.getElementById("members")
+    var channel = Hibira.client().subscribe("presence-room.{{ room.pk }}")
+    function render() {
+      list.replaceChildren()
+      channel.members.each(function (m) {
+        var li = document.createElement("li")
+        li.textContent = m.info.name + (m.id === channel.members.me.id ? " (you)" : "")
+        list.append(li)
+      })
+    }
+    channel.bind("pusher:subscription_succeeded", render)
+    channel.bind("pusher:member_added", render)
+    channel.bind("pusher:member_removed", render)
+    var messages = document.getElementById("messages")
+    document.addEventListener("hibira:swapped", function () { messages.scrollTop = messages.scrollHeight })
+    messages.scrollTop = messages.scrollHeight
+  })
+</script>
+</body>
+</html>

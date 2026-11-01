@@ -1,0 +1,4 @@
+{% load hibira %}<li id="{% dom_id message %}" class="message">
+  <span class="avatar">{{ message.author|first }}</span>
+  <div><strong>{{ message.author }}</strong> <time>{{ message.created|time:"H:i" }}</time><p>{{ message.body }}</p></div>
+</li>
