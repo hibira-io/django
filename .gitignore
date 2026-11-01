@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+node_modules/
+test-results/
+db.sqlite3
