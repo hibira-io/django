@@ -25,7 +25,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      # Until hibira 0.1 is on PyPI: install the SDK from GitHub first.
-      - run: pip install "hibira @ git+https://github.com/hibira-io/python@claude/project-thread-41jdmz"
       - run: pip install "Django~=${{ matrix.django }}.0" -e ".[test]"
       - run: pytest
