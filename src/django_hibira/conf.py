@@ -52,6 +52,8 @@ DEFAULTS: dict[str, Any] = {
     "PUSH_USER_ID": None,
     # Extra keyword arguments for hibira.Client (timeout, ...).
     "CLIENT_OPTIONS": {},
+    # Waiting rooms for WaitingRoomMiddleware: {"/drop/": "presale"}.
+    "WAITING_ROOMS": {},
     # False turns every broadcast and trigger into a no-op (handy for
     # management commands and data migrations). None means "on when the
     # credentials are set".
@@ -78,6 +80,7 @@ class Settings:
     push_user_id: Callable[..., Any] | None
     client_options: dict[str, Any]
     enabled: bool | None
+    waiting_rooms: dict[str, str]
 
     @property
     def configured(self) -> bool:
@@ -160,4 +163,5 @@ def get_settings() -> Settings:
         push_user_id=_callable(_raw("PUSH_USER_ID", user)),
         client_options=dict(_raw("CLIENT_OPTIONS", user) or {}),
         enabled=_raw("ENABLED", user),
+        waiting_rooms=dict(_raw("WAITING_ROOMS", user) or {}),
     )

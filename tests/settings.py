@@ -1,5 +1,6 @@
 SECRET_KEY = "test-secret-key"
 DEBUG = True
+ALLOWED_HOSTS = ["testserver", "shop.example.com"]
 USE_TZ = True
 ROOT_URLCONF = "tests.urls"
 INSTALLED_APPS = [

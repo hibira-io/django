@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Waiting rooms: `@waiting_room("presale")` view decorator and
+  `WaitingRoomMiddleware` (`HIBIRA["WAITING_ROOMS"]`) send visitors without a
+  pass to the Hibira queue and let them in with a signed pass kept in an
+  HttpOnly cookie. `verify_pass()` checks a pass anywhere.
+
 ## 0.1.0
 
 - Live HTML over Hibira: `broadcast_append`, `_prepend`, `_replace`,

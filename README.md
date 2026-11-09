@@ -234,6 +234,35 @@ notifications), and `GET /hibira/push/token?user_id=<pk>` returns a user token
 for the signed-in user, for `setUserId` in the web, Android and iOS push SDKs.
 Send with `django_hibira.get_client().push_to_users([...], {...})`.
 
+## Waiting room
+
+Put a [Hibira waiting room](https://github.com/hibira-io/waiting-room) in front
+of a ticket drop or launch page. Visitors without a pass are sent to the hosted
+queue page; when it's their turn they come back with a signed pass, which is
+checked and kept in an HttpOnly cookie.
+
+```python
+from django_hibira.waiting_room import waiting_room
+
+@waiting_room("presale")
+def drop(request):
+    number = request.hibira_pass.number  # also ticket_id, expires_at
+    ...
+```
+
+Or protect path prefixes for the whole site:
+
+```python
+MIDDLEWARE = [..., "django_hibira.waiting_room.WaitingRoomMiddleware"]
+HIBIRA = {"WAITING_ROOMS": {"/drop/": "presale"}}
+```
+
+Non-GET requests without a pass get a `403`. Create the room (rate, start time,
+`return_urls`) with the [waiting rooms API](https://github.com/hibira-io/pusher-server/blob/master/docs/waiting-rooms.md). A pass is valid
+for 30 minutes by default and works in any browser; if each queue number may
+check out once, record `request.hibira_pass.ticket_id` and refuse a repeat.
+`verify_pass(token, secret, room=...)` checks a pass anywhere else.
+
 ## Settings
 
 Everything goes in one optional `HIBIRA` dict. Connection settings fall back to
@@ -250,6 +279,7 @@ environment variables.
 | `OVERSIZE` | | `"refresh"`: a fragment over the plan's message size limit becomes a page refresh; or `"log"`, `"raise"` |
 | `ENABLED` | | on when the credentials are set; `False` turns sending off |
 | `CLIENT_OPTIONS` | | `{}`, extra `hibira.Client` arguments such as `timeout` |
+| `WAITING_ROOMS` | | `{}`, path prefix → room for `WaitingRoomMiddleware` |
 
 Use the HOST shown on your app page if the app lives outside the default region.
 
@@ -295,6 +325,8 @@ pytest
 ## 中文摘要
 
 django-hibira 讓一般的 Django（WSGI）專案不必架 Django Channels、ASGI 伺服器或 Redis，就能讓頁面即時更新。在 model 上加一行 `@broadcasts(to="room", target="messages")`，新增、修改、刪除資料時，所有開著該頁面的瀏覽器會自動插入、替換或移除對應的 HTML 片段；也可以用 `broadcast_append` 等函式從 view、Celery 任務或管理指令推送任何模板片段。廣播會等交易 commit 後才送出，並支援 htmx、Turbo 8、私有/presence 頻道授權、webhook 驗證與推播 token。到 [hibira.io/portal](https://hibira.io/portal) 建立 app（免費方案不需信用卡），設定 `HIBIRA_APP_ID`、`HIBIRA_APP_KEY`、`HIBIRA_APP_SECRET` 即可開始。
+
+等候室（waiting room）：在搶票或限量開賣的 view 加上 `@waiting_room("presale")`，或在 `MIDDLEWARE` 加 `WaitingRoomMiddleware` 並設定 `HIBIRA["WAITING_ROOMS"]`，沒有 pass 的訪客會被導到 Hibira 託管的排隊頁，輪到時帶著簽名 pass 回來並存成 HttpOnly cookie。
 
 ## License
 
