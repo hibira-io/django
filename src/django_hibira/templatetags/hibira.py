@@ -78,3 +78,21 @@ def dom_id(obj: Any, prefix: str | None = None) -> str:
 @register.simple_tag
 def stream_name(*streamables: Any) -> str:
     return streams.stream_name(*streamables)
+
+
+@register.simple_tag(takes_context=True)
+def hibira_live_chat(
+    context: template.Context,
+    workspace: str | None = None,
+    color: str | None = None,
+    lang: str | None = None,
+    launcher: bool = True,
+) -> str:
+    """The Hibira Live Chat widget, with the signed-in user verified when
+    HIBIRA["LIVECHAT_IDENTITY_SECRET"] is set. Empty without a workspace."""
+    from ..livechat import attributes
+
+    attrs = attributes(context.get("request"), workspace=workspace, color=color, lang=lang, launcher=launcher)
+    if not attrs:
+        return ""
+    return format_html("<script{} async></script>", format_html_join("", ' {}="{}"', attrs.items()))

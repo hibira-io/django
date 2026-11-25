@@ -263,6 +263,27 @@ for 30 minutes by default and works in any browser; if each queue number may
 check out once, record `request.hibira_pass.ticket_id` and refuse a repeat.
 `verify_pass(token, secret, room=...)` checks a pass anywhere else.
 
+## Live Chat
+
+Put the [Hibira Live Chat](https://chat.hibira.io) widget on your pages, and
+let signed-in users chat as themselves:
+
+```django
+{% load hibira %}
+...
+{% hibira_live_chat %}
+</body>
+```
+
+Set `HIBIRA["LIVECHAT_WORKSPACE"]` (or `HIBIRA_LIVECHAT_WORKSPACE`) to the
+workspace ID from Live Chat › Settings › Widget. With
+`HIBIRA["LIVECHAT_IDENTITY_SECRET"]` set too (Verified visitors, Starter plan
+and up), a signed-in `request.user` is sent with `data-user-hash`, an HMAC of
+their ID, so the inbox shows their name and email and nobody can pretend to be
+them. Options: `{% hibira_live_chat color="#0a7" lang="ja" launcher=False %}`.
+In an SPA, `django_hibira.livechat.identity(request.user)` returns the fields
+for `HibiraLiveChat.identify()`.
+
 ## Settings
 
 Everything goes in one optional `HIBIRA` dict. Connection settings fall back to
@@ -280,6 +301,7 @@ environment variables.
 | `ENABLED` | | on when the credentials are set; `False` turns sending off |
 | `CLIENT_OPTIONS` | | `{}`, extra `hibira.Client` arguments such as `timeout` |
 | `WAITING_ROOMS` | | `{}`, path prefix → room for `WaitingRoomMiddleware` |
+| `LIVECHAT_WORKSPACE`, `LIVECHAT_IDENTITY_SECRET` | `HIBIRA_LIVECHAT_WORKSPACE`, `HIBIRA_LIVECHAT_IDENTITY_SECRET` | none: `{% hibira_live_chat %}` renders nothing without a workspace |
 
 Use the HOST shown on your app page if the app lives outside the default region.
 
@@ -327,6 +349,8 @@ pytest
 django-hibira 讓一般的 Django（WSGI）專案不必架 Django Channels、ASGI 伺服器或 Redis，就能讓頁面即時更新。在 model 上加一行 `@broadcasts(to="room", target="messages")`，新增、修改、刪除資料時，所有開著該頁面的瀏覽器會自動插入、替換或移除對應的 HTML 片段；也可以用 `broadcast_append` 等函式從 view、Celery 任務或管理指令推送任何模板片段。廣播會等交易 commit 後才送出，並支援 htmx、Turbo 8、私有/presence 頻道授權、webhook 驗證與推播 token。到 [hibira.io/portal](https://hibira.io/portal) 建立 app（免費方案不需信用卡），設定 `HIBIRA_APP_ID`、`HIBIRA_APP_KEY`、`HIBIRA_APP_SECRET` 即可開始。
 
 等候室（waiting room）：在搶票或限量開賣的 view 加上 `@waiting_room("presale")`，或在 `MIDDLEWARE` 加 `WaitingRoomMiddleware` 並設定 `HIBIRA["WAITING_ROOMS"]`，沒有 pass 的訪客會被導到 Hibira 託管的排隊頁，輪到時帶著簽名 pass 回來並存成 HttpOnly cookie。
+
+Live Chat：在頁尾加 `{% hibira_live_chat %}` 就會放上 Hibira Live Chat 聊天視窗；設定 `LIVECHAT_IDENTITY_SECRET` 後，已登入的使用者會以 HMAC 簽名的身分聊天，客服收件匣看得到他的姓名與 email，別人也無法冒充。
 
 ## License
 

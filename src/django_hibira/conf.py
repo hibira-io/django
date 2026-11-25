@@ -33,6 +33,8 @@ ENV = {
     "PUSH_INSTANCE_ID": "HIBIRA_PUSH_INSTANCE_ID",
     "PUSH_SECRET_KEY": "HIBIRA_PUSH_SECRET_KEY",
     "PUSH_ENDPOINT": "HIBIRA_PUSH_ENDPOINT",
+    "LIVECHAT_WORKSPACE": "HIBIRA_LIVECHAT_WORKSPACE",
+    "LIVECHAT_IDENTITY_SECRET": "HIBIRA_LIVECHAT_IDENTITY_SECRET",
 }
 
 DEFAULTS: dict[str, Any] = {
@@ -81,6 +83,8 @@ class Settings:
     client_options: dict[str, Any]
     enabled: bool | None
     waiting_rooms: dict[str, str]
+    livechat_workspace: str | None = None
+    livechat_identity_secret: str | None = None
 
     @property
     def configured(self) -> bool:
@@ -164,4 +168,6 @@ def get_settings() -> Settings:
         client_options=dict(_raw("CLIENT_OPTIONS", user) or {}),
         enabled=_raw("ENABLED", user),
         waiting_rooms=dict(_raw("WAITING_ROOMS", user) or {}),
+        livechat_workspace=_blank(_raw("LIVECHAT_WORKSPACE", user)),
+        livechat_identity_secret=_blank(_raw("LIVECHAT_IDENTITY_SECRET", user)),
     )
