@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Live Chat: `{% hibira_live_chat %}` puts the Hibira Live Chat widget on the page; with `HIBIRA["LIVECHAT_IDENTITY_SECRET"]` the signed-in user is a verified visitor (`data-user-hash`). `django_hibira.livechat.identity()` and `user_hash()` for SPAs.
+
 ## 0.2.0
 
 - Waiting rooms: `@waiting_room("presale")` view decorator and
